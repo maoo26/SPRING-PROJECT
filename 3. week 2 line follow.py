@@ -1,12 +1,12 @@
 import cv2
 import numpy as np
-import RPi.GPIO as GPIO
 import time
+import RPi.GPIO as GPIO
 GPIO.setwarnings(False)
 
-# define a video capture object
-vid = cv2.VideoCapture(0)
-  
+cap = cv2.VideoCapture(0)
+cap.set(3, 160)
+cap.set(4, 120)
 ENA = 13
 IN1 = 16
 IN2 = 20
@@ -25,8 +25,8 @@ GPIO.setup(IN4, GPIO.OUT)
 GPIO.setup(ENB, GPIO.OUT)
 pwmA = GPIO.PWM(ENA,100) #PWM frequency is set to 100Hz
 pwmB = GPIO.PWM(ENB,100)
-pwmA.start(0) #start with 0% duty cycle
-pwmB.start(0)
+pwmA.start(50) #start with 0% duty cycle
+pwmB.start(50)
 
 # Initial state
 GPIO.output(IN1, GPIO.LOW)
@@ -39,16 +39,9 @@ def forward():
     GPIO.output(IN2, GPIO.HIGH)
     GPIO.output(IN3, GPIO.HIGH)
     GPIO.output(IN4, GPIO.LOW)
-    pwmA.ChangeDutyCycle(47)#30 #36
-    pwmB.ChangeDutyCycle(37)#20 #36
-    
-def backward():
-    GPIO.output(IN1, GPIO.HIGH)
-    GPIO.output(IN2, GPIO.LOW)
-    GPIO.output(IN3, GPIO.LOW)
-    GPIO.output(IN4, GPIO.HIGH)
-    pwmA.ChangeDutyCycle(32)
-    pwmB.ChangeDutyCycle(42)
+    pwmA.ChangeDutyCycle(60)
+    pwmB.ChangeDutyCycle(50)
+    time.sleep(4)
     
 def stop():
     GPIO.output(IN1, GPIO.HIGH)
@@ -57,45 +50,43 @@ def stop():
     GPIO.output(IN4, GPIO.HIGH)
     pwmA.ChangeDutyCycle(0)
     pwmB.ChangeDutyCycle(0)
+    time.sleep(2)
     
-def turnleft(a,b):
+def backward():
+    GPIO.output(IN1, GPIO.HIGH)
+    GPIO.output(IN2, GPIO.LOW)
+    GPIO.output(IN3, GPIO.LOW)
+    GPIO.output(IN4, GPIO.HIGH)
+    pwmA.ChangeDutyCycle(60)
+    pwmB.ChangeDutyCycle(50)
+    time.sleep(3)
+    
+def turnleft():
     GPIO.output(IN1, GPIO.LOW)
     GPIO.output(IN2, GPIO.HIGH)
     GPIO.output(IN3, GPIO.LOW)
     GPIO.output(IN4, GPIO.HIGH)
-    pwmA.ChangeDutyCycle(a) #40 #42 #39
-    pwmB.ChangeDutyCycle(b) #30 #39 #36
-
+    pwmA.ChangeDutyCycle(70)
+    pwmB.ChangeDutyCycle(40)
+    #time.sleep(1)
     
-def turnright(a,b):
+def turnright():
     GPIO.output(IN1, GPIO.HIGH)
     GPIO.output(IN2, GPIO.LOW)
     GPIO.output(IN3, GPIO.HIGH)
     GPIO.output(IN4, GPIO.LOW)
-    pwmA.ChangeDutyCycle(a) #37 #35 #42 #36
-    pwmB.ChangeDutyCycle(b) #40 #38 #44 #39
-
-
-
-while(True):
+    pwmA.ChangeDutyCycle(40)
+    pwmB.ChangeDutyCycle(40)
+    #time.sleep(1)
     
-    # Capture the video frame by frameq
-    ret, frame = vid.read()
-    
+while True:
+    ret, frame = cap.read()
     # Rotate the frame by 180 degrees
-    #frame = cv2.rotate(frame, cv2.ROTATE_180)
+    frame = cv2.rotate(frame, cv2.ROTATE_180)
     
-    # Define the y-coordinate range for the ROI
-    y_top = 100  # Example top y-coordinate
-    y_bottom = 480  # Example bottom y-coordinate
-    
-    # Crop the frame to the specified ROI
-    cropped_frame = frame[y_top:y_bottom, :]
-    
-    # differentiate black lines from rest of the frames
-    low_black = np.uint8([60,60,60]) 
-    high_black = np.uint8([0,0,0]) #hsv
-    mask = cv2.inRange(cropped_frame, high_black, low_black)
+    low_b = np.uint8([5,5,5])
+    high_b = np.uint8([0,0,0])
+    mask = cv2.inRange(frame, high_b, low_b)
     contours, hierarchy = cv2.findContours(mask, 1, cv2.CHAIN_APPROX_NONE)
     if len(contours) > 0 :
         C = max(contours, key=cv2.contourArea)
@@ -103,46 +94,28 @@ while(True):
         if M["m00"] !=0 :
             cx = int(M['m10']/M['m00'])
             cy = int(M['m01']/M['m00'])
-            # Adjusting centroid coordinates for cropping offset
-            cy_adjusted = cy + y_top
-            print("CX : "+str(cx)+"  CY : "+str(cy_adjusted))
-            if cx <= 260 : 
+            print("CX : "+str(cx)+"  CY : "+str(cy))
+            if cx >= 120 :
                 print("Turn Left")
-                turnleft(51,46)
-                
-            if cx < 415 and cx > 260 :
+                turnleft()
+            if cx < 120 and cx > 40 :
                 print("On Track!")
                 forward()
-                
-            if cx >= 415 :
+            if cx <=40 :
                 print("Turn Right")
-                turnright(52,51)
-                
-            if cy_adjusted >= 350 and cx <= 140: #160
-                turnleft(58,48)
-                print("Turn Left -----------------------")
-                
-            if cy_adjusted >= 350 and cx >= 520: #500
-                print("Turn Right -----------------------")
-                turnright(51,56)
-            cv2.circle(frame, (cx,cy_adjusted), 5, (255,255,255), -1)
+                turnright()
+            cv2.circle(frame, (cx,cy), 5, (255,255,255), -1)
     else :
         print("I don't see the line")
-        backward()
+        stop()
         
-    cv2.drawContours(cropped_frame, contours, -1, (0,255,0), 1)
-    #lower_black = np.uint8([50,50,50])w
-          
-    cv2.imshow("Mask", mask)
-    cv2.imshow('frame', cropped_frame)
+    cv2.drawContours(frame, contours, -1, (0,255,0), 1)
+    cv2.imshow("Mask",mask)
+    cv2.imshow("Frame",frame)
     
-    # the 'q' button is set as the
-    # quitting button you may use any
-    # desired button of your choice
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if cv2.waitKey(1) & 0xff == ord('q'):   # 1 is the time in ms
+        stop()
         break
-  
-# After the loop release the cap object
-vid.release()
-# Destroy all the windows
+    
+cap.release()
 cv2.destroyAllWindows()
