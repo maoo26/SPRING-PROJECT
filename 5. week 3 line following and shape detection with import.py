@@ -5,7 +5,9 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 import time
 import os
+# import line following code
 import follow
+# import shape detection code
 import template
 
 
