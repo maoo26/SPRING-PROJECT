@@ -185,7 +185,7 @@ def linefollow(img):
             #cv2.circle(frame, (c2_cx,c2_cy_adjusted), 5, (255,255,255), -1)
     else:
         low_black = np.uint8([0,0,0]) 
-        high_black = np.uint8([48,48,48]) #hsv
+        high_black = np.uint8([48,48,48]) #rgb
         mask = cv2.inRange(cropped_frame, low_black, high_black)
         contours, hierarchy = cv2.findContours(mask, 1, cv2.CHAIN_APPROX_NONE)
         if len(contours) > 0 :
