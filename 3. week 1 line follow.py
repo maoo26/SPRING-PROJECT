@@ -81,10 +81,8 @@ def turnright():
     
 while True:
     ret, frame = cap.read()
-    # Rotate the frame by 180 degrees
-    frame = cv2.rotate(frame, cv2.ROTATE_180)
     
-    low_b = np.uint8([5,5,5])
+    low_b = np.uint8([50,50,50])
     high_b = np.uint8([0,0,0])
     mask = cv2.inRange(frame, high_b, low_b)
     contours, hierarchy = cv2.findContours(mask, 1, cv2.CHAIN_APPROX_NONE)
