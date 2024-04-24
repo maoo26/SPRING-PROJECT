@@ -173,25 +173,26 @@ def linefollow(img):
 
     # Find contours in the red mask
     c2_contours, _ = cv2.findContours(c2_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
+
+    # For black line
+    low_black = np.uint8([0,0,0]) 
+    high_black = np.uint8([48,48,48]) #rgb
+    mask = cv2.inRange(cropped_frame, low_black, high_black)
+    contours, hierarchy = cv2.findContours(mask, 1, cv2.CHAIN_APPROX_NONE)
+
     # Line following
     if len(c1_contours) > 0:
         movement(c1_contours)
         #cv2.imshow("c1Mask", c1_mask)
-            #cv2.circle(frame, (c1_cx,c1_cy_adjusted), 5, (255,255,255), -1)
+        #cv2.circle(frame, (c1_cx,c1_cy_adjusted), 5, (255,255,255), -1)
     elif len(c2_contours) > 0:
         movement(c2_contours)
         #cv2.imshow("c2Mask", c2_mask)
-            #cv2.circle(frame, (c2_cx,c2_cy_adjusted), 5, (255,255,255), -1)
-    else:
-        low_black = np.uint8([0,0,0]) 
-        high_black = np.uint8([48,48,48]) #rgb
-        mask = cv2.inRange(cropped_frame, low_black, high_black)
-        contours, hierarchy = cv2.findContours(mask, 1, cv2.CHAIN_APPROX_NONE)
-        if len(contours) > 0 :
-            movement(contours)
-            #cv2.imshow("Mask", mask)
-            #cv2.circle(frame, (cx,cy_adjusted), 5, (255,255,255), -1)
+        #cv2.circle(frame, (c2_cx,c2_cy_adjusted), 5, (255,255,255), -1)
+    elif len(contours) > 0 :
+        movement(contours)
+        #cv2.imshow("Mask", mask)
+        #cv2.circle(frame, (cx,cy_adjusted), 5, (255,255,255), -1)
         else :
             #print("I don't see the line")
             backward()
