@@ -50,12 +50,9 @@ GPIO.output(IN4, GPIO.LOW)
 
 text = ['rectangle', 'triangle', 'partial circle', 'hexagon', 'circle', 'pentagon',
         'left', 'right', 'up', 'down']
-threshold = [0.5, 0.75, 0.7, 0.77, 0.7, 0.88,
+threshold = [0.7, 0.75, 0.7, 0.77, 0.7, 0.88,
              0.7, 0.7, 0.7, 0.7]
-#threshold = [0.31, 0.22, 0.36, 0.25, 0.25, 0.17, 0.15, 0.50, 0.35, 0.20, 0.25]
 template_folder = '/home/pi/Desktop/template fast/shape merged'
-#threshold = [0.7, 0.75, 0.55, 0.6, 0.57, 0.55, 1]
-#template_folder = '/home/pi/Desktop/template fast/attachments (6)'
 """
 text = ['left','right','up','down']
 #threshold = [0.73,0.73,0.76,0.85] #arrow
@@ -133,18 +130,18 @@ def movement(contours):
         cy = int(M['m01']/M['m00'])
         cy_adjusted = cy + y_top
         if cx <= 260 : 
-            turnleft(46,41) #51,46 #48,43
+            turnleft(46,41) 
             
         if cx < 415 and cx > 260 :
             forward()
             
         if cx >= 415 : 
-            turnright(47,46) #52,51 #49,48
+            turnright(47,46) 
             
-        if cy_adjusted >= 350 and cx <= 140: #160
+        if cy_adjusted >= 350 and cx <= 140: 
             turnleft(58,48)
             
-        if cy_adjusted >= 350 and cx >= 520: #500
+        if cy_adjusted >= 350 and cx >= 520: 
             turnright(51,56)
 
 def linefollow(img):
@@ -154,24 +151,24 @@ def linefollow(img):
     # Convert the frame to HSV color space
     hsv_frame = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2HSV)
 
-    # Define the range for red color in HSV format
+    # Define the range for green color in HSV format
     low_c1 = np.array([40, 100, 72])
     high_c1 = np.array([80, 255, 255])
     
-    # Create a mask to isolate red color
+    # Create a mask to isolate green color
     c1_mask = cv2.inRange(hsv_frame, low_c1, high_c1)
     
-    # Find contours in the red mask
+    # Find contours in the green mask
     c1_contours, _ = cv2.findContours(c1_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
-    # Define the range for red color in HSV format
+    # Define the range for blue color in HSV format
     low_c2 = np.array([100, 100, 40])
     high_c2 = np.array([140, 255, 255])
     
-    # Create a mask to isolate red color
+    # Create a mask to isolate blue color
     c2_mask = cv2.inRange(hsv_frame, low_c2, high_c2)
 
-    # Find contours in the red mask
+    # Find contours in the blue mask
     c2_contours, _ = cv2.findContours(c2_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # For black line
