@@ -75,6 +75,19 @@ def turnright(a,b):
     pwmA.ChangeDutyCycle(a) #37 #35 #42 #36
     pwmB.ChangeDutyCycle(b) #40 #38 #44 #39
 
+#red
+low_red = np.array([0,100,100]) 
+high_red = np.array([10,255,255]) 
+#yellow
+low_yellow = np.array([20,100,100]) 
+high_yellow = np.array([40,255,255]) 
+#green
+low_green = np.array([40,100,72]) 
+high_green = np.array([80,255,255]) 
+#blue
+low_blue = np.array([100,100,40]) 
+high_blue = np.array([140,255,255]) 
+
 colour_ranges = {
     "r" : ([0,100,100],[10,255,255]),
     "y" : ([20,100,100],[40,255,255]),
@@ -143,7 +156,7 @@ while(True):
                 #cv2.circle(frame, (colour_cx,colour_cy_adjusted), 5, (255,255,255), -1)
         else:
             low_black = np.uint8([0,0,0]) 
-            high_black = np.uint8([48,48,48]) #hsv
+            high_black = np.uint8([48,48,48]) #rgb
             mask = cv2.inRange(cropped_frame, low_black, high_black)
             contours, hierarchy = cv2.findContours(mask, 1, cv2.CHAIN_APPROX_NONE)
             if len(contours) > 0 :
